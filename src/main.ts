@@ -6,6 +6,11 @@ const gridSize = 3;
 let Score = 0;
 let Chance = 3;
 let currentSelectedHole: string;
+let timer: number;
+let gameTimer: number;
+let isStart: boolean = false;
+let gameTime = 60;
+let gameSpeed = { easy: 1200, medium: 1200, hard: 200 };
 
 function printScore(score: number, chance: number) {
   let scoreElement: HTMLElement | null = document.querySelector(".score__card");
@@ -72,17 +77,100 @@ function trackClick() {
       return;
     }
 
+    if (targetEle.classList.contains("holes__parent")) return; //in case of click on the parent
+
     let selectedHole = targetEle.getAttribute("id");
+
+    if (Chance === 0 && gameTime <= 0) {
+      clearTimeout(timer); //clear timeout if chance is 0 and Game Time is Over
+      return;
+    }
+
+    if (Chance === 0) {
+      alert("Not Enough Chance! Please Restart The Game");
+      clearTimeout(timer); //clear timeout After Total CHance End
+      return;
+    }
+
+    const data = {
+      score: Score,
+    };
+
+    let highestScore: { score: number } | null | string =
+      localStorage.getItem("score");
+    if (!highestScore) {
+      localStorage.setItem("score", JSON.stringify(data));
+    } else {
+      highestScore = JSON.parse(localStorage.getItem("score"));
+    }
+
+    if (highestScore["score"] <= Score) {
+      localStorage.setItem("score", JSON.stringify(data));
+    }
+
+    console.log(selectedHole, currentSelectedHole);
     if (selectedHole === currentSelectedHole) {
       printScore(++Score, Chance);
     } else {
-      if (Chance === 0) {
-        alert("Not Enough Chance! Please Restart The Game");
-        return;
-      }
       printScore(Score, --Chance);
     }
   });
+}
+
+function showTime() {
+  let gameEndElement: HTMLElement = document.querySelector(".game__end");
+  gameTimer = setInterval(() => {
+    if (gameTime <= 0) {
+      alert("Game Time is Over");
+      clearTimeout(timer); //clear timeout After Total Game Time End
+      clearTimeout(gameTimer);
+      return;
+    }
+    gameEndElement.textContent = `Game End In: ${--gameTime} Sec`;
+  }, 1000);
+}
+
+function printPrevScore() {
+  let prevHighestEle: HTMLElement | null =
+    document.querySelector(".prev__higest");
+  prevHighestEle.textContent = `Prev Highest :`;
+  let highestScore = JSON.parse(localStorage.getItem("score"));
+  if (!highestScore) {
+    prevHighestEle.textContent = `Prev Highest : 0`;
+  } else {
+    prevHighestEle.textContent = `Prev Highest : ${highestScore["score"]}`;
+  }
+}
+
+// function applyGameSpeed() {
+//   let timerDelay: number;
+
+//   if (Score <= 2) {
+//     timerDelay = gameSpeed.easy;
+//   } else if (Score > 2 && Score <= 4) {
+//     timerDelay = gameSpeed.medium;
+//   } else {
+//     timerDelay = gameSpeed.hard;
+//   }
+
+//   return timerDelay;
+// }
+
+function afterStart() {
+  if (isStart === true) return; // if one start not allow to click again
+  showTime();
+  printScore(Score, Chance);
+  randomMoleAppear();
+  trackClick();
+  timer = setInterval(randomMoleAppear, gameSpeed.easy);
+  isStart = true;
+}
+
+function start() {
+  let startButton: HTMLButtonElement | null =
+    document.querySelector(".start__btn");
+  if (!startButton) return;
+  startButton.addEventListener("click", afterStart);
 }
 
 function restart() {
@@ -94,23 +182,8 @@ function restart() {
   });
 }
 
-function start() {
-  let startButton: HTMLButtonElement | null =
-    document.querySelector(".start__btn");
-  if (!startButton) return;
-  startButton.addEventListener("click", () => {
-    setInterval(randomMoleAppear, 1200);
-  });
-}
-
 createHoles(gridSize, game);
-
-printScore(Score, Chance);
-
-randomMoleAppear();
-
-trackClick();
-
 start();
-
 restart();
+
+printPrevScore();

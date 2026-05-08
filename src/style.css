@@ -64,3 +64,12 @@ body {
 .start__btn {
   background: #96f2d7;
 }
+
+.chance {
+  font-weight: bold;
+}
+
+.game__end {
+  color: red;
+  font-weight: bold;
+}
