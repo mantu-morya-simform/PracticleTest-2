@@ -21,17 +21,22 @@ function createHoles(gridSize: number, gameElement: HTMLElement | null) {
 createHoles(gridSize, game);
 
 function randomMoleAppear() {
-  let allHoleElement: NodeListOf<Element> = document.querySelectorAll(".hole");
+  let allHoleElement: NodeListOf<HTMLElement> | null =
+    document.querySelectorAll(".hole");
+
+  if (!allHoleElement) return;
 
   allHoleElement.forEach((hole: HTMLElement) => {
+    if (!hole) return;
     hole.innerHTML = "";
   });
 
   let randomHole = Math.ceil(Math.random() * 9);
   let randomHoleId = `hole-${randomHole}`;
-  let randomHoleElement: HTMLElement = document.querySelector(
+  let randomHoleElement: HTMLElement | null = document.querySelector(
     `#${randomHoleId}`,
   );
+  if (!randomHoleElement) return;
   randomHoleElement.innerHTML = ` <img class="angry__imogi" src="./src/assets/angry.png" alt="" />`;
 }
 
