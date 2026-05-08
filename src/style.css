@@ -1,0 +1,37 @@
+* {
+  margin: 0%;
+  padding: 0%;
+  box-sizing: border-box;
+}
+
+body {
+  height: 100vh;
+  width: 100%;
+}
+
+.game {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.holes__parent {
+  height: 500px;
+  width: 500px;
+  background: #adb5bd;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  row-gap: 20px;
+  column-gap: 20px;
+  padding: 60px;
+  border-radius: 5px;
+}
+
+.hole {
+  height: 100px;
+  width: 100px;
+  background: #212529;
+  border-radius: 50%;
+  cursor: pointer;
+}
