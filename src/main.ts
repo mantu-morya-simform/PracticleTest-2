@@ -164,7 +164,7 @@ function afterStart() {
 
   Score = 0;
   Chance = 3;
-  gameTime = 10;
+  gameTime = 60;
 
   printScore(Score, Chance);
   showTime();
