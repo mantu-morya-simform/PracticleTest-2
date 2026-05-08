@@ -4,7 +4,8 @@ console.log(game);
 
 const gridSize = 3;
 
-function createHoles(gridSize: number, gameElement: HTMLElement) {
+function createHoles(gridSize: number, gameElement: HTMLElement | null) {
+  if (!gameElement) return;
   let holesParent: HTMLDivElement = document.createElement("div");
   holesParent.classList.add("holes__parent");
   for (let i = 0; i < gridSize; i++) {
