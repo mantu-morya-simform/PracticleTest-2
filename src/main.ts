@@ -1,6 +1,7 @@
 const game = document.querySelector<HTMLElement>(".game");
 
-import imgUrl from "./assets/angry.png";
+import moleImgUrl from "./assets/mole.png";
+import bombImageUrl from "./assets/bomb.png";
 
 const gridSize = 3;
 let Score = 0;
@@ -10,14 +11,18 @@ let timer: number;
 let gameTimer: number;
 let isStart: boolean = false;
 let gameTime = 60;
-let gameSpeed = { easy: 1200, medium: 1200, hard: 200 };
+let gameSpeed = { easy: 1200, medium: 800, hard: 200 };
+
+type HighestScore = {
+  score: number;
+};
 
 function printScore(score: number, chance: number) {
   let scoreElement: HTMLElement | null = document.querySelector(".score__card");
   let chanceElement: HTMLElement | null = document.querySelector(".chance");
   if (!scoreElement || !chanceElement) return;
-  scoreElement.innerText = `Score-${score}`;
-  chanceElement.innerText = `Chance-${chance}`;
+  scoreElement.innerText = `Score: ${score}`;
+  chanceElement.innerText = `Chance: ${chance}`;
 }
 
 function createHoles(gridSize: number, gameElement: HTMLElement | null) {
@@ -62,7 +67,27 @@ function randomMoleAppear() {
     `#${randomHoleId}`,
   );
   if (!randomHoleElement) return;
-  randomHoleElement.innerHTML = ` <img class="angry__imogi" id=${randomHoleId} src=${imgUrl} alt="" />`;
+  let moleElement = ` <img class="mole__imogi" id=${randomHoleId} src=${moleImgUrl} alt="" />`;
+  let bombElement = ` <img class="bomb__imogi" id=${randomHoleId}-bomb src=${bombImageUrl} alt="" />`;
+  let randomElement: string;
+
+  if (Math.floor(Math.random() * 3) >= 2) {
+    randomElement = moleElement;
+  } else {
+    randomElement = bombElement;
+  }
+
+  randomHoleElement.innerHTML = randomElement;
+}
+
+function getHighestScore(): HighestScore {
+  const storedData = localStorage.getItem("score");
+
+  if (!storedData) {
+    return { score: 0 };
+  }
+
+  return JSON.parse(storedData) as HighestScore;
 }
 
 function trackClick() {
@@ -81,31 +106,44 @@ function trackClick() {
 
     let selectedHole = targetEle.getAttribute("id");
 
+    const data = {
+      score: Score,
+    };
+
+    let highestScore: HighestScore = getHighestScore();
+
+    if (!highestScore) {
+      localStorage.setItem("score", JSON.stringify(data));
+    } else {
+      highestScore = getHighestScore();
+    }
+
+    if (!highestScore) return;
+
     if (Chance === 0 && gameTime <= 0) {
-      clearTimeout(timer); //clear timeout if chance is 0 and Game Time is Over
+      clearTimeout(timer); //clear timeout After Total CHance End
+
+      if (highestScore.score <= Score) {
+        localStorage.setItem("score", JSON.stringify(data));
+        alert(`Your New Highest Score is: ${Score}`);
+      }
+      Score = 0;
+      Chance = 3;
+      isStart = false;
       return;
     }
 
     if (Chance === 0) {
       alert("Not Enough Chance! Please Restart The Game");
       clearTimeout(timer); //clear timeout After Total CHance End
+      if (highestScore.score <= Score) {
+        localStorage.setItem("score", JSON.stringify(data));
+        alert(`Your New Highest Score is: ${Score}`);
+      }
+      Score = 0;
+      Chance = 3;
+      isStart = false;
       return;
-    }
-
-    const data = {
-      score: Score,
-    };
-
-    let highestScore: { score: number } | null | string =
-      localStorage.getItem("score");
-    if (!highestScore) {
-      localStorage.setItem("score", JSON.stringify(data));
-    } else {
-      highestScore = JSON.parse(localStorage.getItem("score"));
-    }
-
-    if (highestScore["score"] <= Score) {
-      localStorage.setItem("score", JSON.stringify(data));
     }
 
     console.log(selectedHole, currentSelectedHole);
@@ -118,7 +156,8 @@ function trackClick() {
 }
 
 function showTime() {
-  let gameEndElement: HTMLElement = document.querySelector(".game__end");
+  let gameEndElement: HTMLElement | null = document.querySelector(".game__end");
+  if (!gameEndElement) return;
   gameTimer = setInterval(() => {
     if (gameTime <= 0) {
       alert("Game Time is Over");
@@ -133,36 +172,44 @@ function showTime() {
 function printPrevScore() {
   let prevHighestEle: HTMLElement | null =
     document.querySelector(".prev__higest");
+  if (!prevHighestEle) return;
   prevHighestEle.textContent = `Prev Highest :`;
-  let highestScore = JSON.parse(localStorage.getItem("score"));
+  let data: string | null = localStorage.getItem("score");
+  if (!data) return;
+  let highestScore: HighestScore = getHighestScore();
   if (!highestScore) {
     prevHighestEle.textContent = `Prev Highest : 0`;
   } else {
-    prevHighestEle.textContent = `Prev Highest : ${highestScore["score"]}`;
+    prevHighestEle.textContent = `Prev Highest : ${highestScore.score}`;
   }
 }
 
-// function applyGameSpeed() {
-//   let timerDelay: number;
+function getGameSpeed() {
+  if (Score <= 2) {
+    return gameSpeed.easy;
+  }
 
-//   if (Score <= 2) {
-//     timerDelay = gameSpeed.easy;
-//   } else if (Score > 2 && Score <= 4) {
-//     timerDelay = gameSpeed.medium;
-//   } else {
-//     timerDelay = gameSpeed.hard;
-//   }
+  if (Score <= 4) {
+    return gameSpeed.medium;
+  }
 
-//   return timerDelay;
-// }
+  return gameSpeed.hard;
+}
+
+function updateGameSpeed() {
+  clearInterval(timer);
+
+  timer = window.setInterval(() => {
+    randomMoleAppear();
+  }, getGameSpeed());
+}
 
 function afterStart() {
   if (isStart === true) return; // if one start not allow to click again
   showTime();
   printScore(Score, Chance);
   randomMoleAppear();
-  trackClick();
-  timer = setInterval(randomMoleAppear, gameSpeed.easy);
+  updateGameSpeed();
   isStart = true;
 }
 
@@ -183,7 +230,7 @@ function restart() {
 }
 
 createHoles(gridSize, game);
+trackClick();
 start();
 restart();
-
 printPrevScore();
