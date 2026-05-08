@@ -35,3 +35,8 @@ body {
   border-radius: 50%;
   cursor: pointer;
 }
+
+.angry__imogi {
+  height: 100px;
+  width: 100px;
+}
