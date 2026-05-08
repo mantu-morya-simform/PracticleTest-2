@@ -1,5 +1,7 @@
 const game = document.querySelector<HTMLElement>(".game");
 
+import imgUrl from "./assets/angry.png";
+
 const gridSize = 3;
 let Score = 0;
 let Chance = 3;
@@ -55,7 +57,7 @@ function randomMoleAppear() {
     `#${randomHoleId}`,
   );
   if (!randomHoleElement) return;
-  randomHoleElement.innerHTML = ` <img class="angry__imogi" id=${randomHoleId} src="./src/assets/angry.png" alt="" />`;
+  randomHoleElement.innerHTML = ` <img class="angry__imogi" id=${randomHoleId} src=${imgUrl} alt="" />`;
 }
 
 function trackClick() {
