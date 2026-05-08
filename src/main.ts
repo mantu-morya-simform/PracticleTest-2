@@ -10,7 +10,7 @@ let currentSelectedHole: string = "";
 let timer: number;
 let gameTimer: number;
 let isStart: boolean = false;
-let gameTime = 10;
+let gameTime = 60;
 let gameSpeed = { easy: 1200, medium: 800, hard: 200 };
 
 type HighestScore = {
