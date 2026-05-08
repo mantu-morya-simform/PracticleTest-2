@@ -1,0 +1,3 @@
+const game = document.querySelector<HTMLElement>(".class");
+
+const holesCount=
