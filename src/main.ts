@@ -128,7 +128,7 @@ function showTime() {
   gameTimer = window.setInterval(() => {
     if (gameTime <= 0) {
       alert("Game Time is Over");
-      clearInterval(timer);
+      clearInterval(timer); //clear timeout After Total Game Time End
       clearInterval(gameTimer);
       isStart = false;
       return;
