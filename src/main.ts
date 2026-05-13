@@ -11,7 +11,7 @@ let timer: number;
 let gameTimer: number;
 let isStart: boolean = false;
 let gameTime = 60;
-let gameSpeed = { easy: 1200, medium: 800, hard: 200 };
+let gameSpeed = { easy: 1200, medium: 1000, hard: 800 };
 
 type HighestScore = {
   score: number;
@@ -85,6 +85,15 @@ function getHighestScore(): HighestScore {
   return storedData ? JSON.parse(storedData) : { score: 0 };
 }
 
+function saveHighestScoreIfNew() {
+  const highestScore = getHighestScore();
+  if (highestScore.score <= Score) {
+    localStorage.setItem("score", JSON.stringify({ score: Score }));
+    alert(`Your New Highest Score is: ${Score}`);
+  }
+  printPrevScore();
+}
+
 function trackClick() {
   let holesParent = document.querySelector<HTMLDivElement>(".holes__parent");
   if (!holesParent) return;
@@ -97,26 +106,19 @@ function trackClick() {
 
     let selectedHole = targetEle.getAttribute("id");
 
-    let highestScore = getHighestScore();
-
-    //clear timeout After Total CHance End or game Time is End
-    if (Chance === 0 || gameTime <= 0) {
-      clearInterval(timer);
-      clearInterval(gameTimer);
-      isStart = false;
-
-      if (highestScore.score <= Score) {
-        localStorage.setItem("score", JSON.stringify({ score: Score }));
-        alert(`Your New Highest Score is: ${Score}`);
-      }
-      return;
-    }
-
-    if (selectedHole?.includes(currentSelectedHole)) {
+    if (selectedHole === currentSelectedHole) {
       printScore(++Score, Chance);
       updateGameSpeed();
     } else {
       printScore(Score, --Chance);
+      if (Chance === 0) {
+        clearInterval(timer);
+        clearInterval(gameTimer);
+        isStart = false;
+        alert("No Chance Left...");
+        saveHighestScoreIfNew();
+        return;
+      }
     }
   });
 }
@@ -131,6 +133,7 @@ function showTime() {
       clearInterval(timer); //clear timeout After Total Game Time End
       clearInterval(gameTimer);
       isStart = false;
+      saveHighestScoreIfNew();
       return;
     }
     gameEndElement.textContent = `Game End In: ${--gameTime} Sec`;
@@ -146,8 +149,8 @@ function printPrevScore() {
 }
 
 function getGameSpeed() {
-  if (Score <= 2) return gameSpeed.easy;
-  if (Score <= 4) return gameSpeed.medium;
+  if (Score <= 4) return gameSpeed.easy;
+  if (Score <= 8) return gameSpeed.medium;
   return gameSpeed.hard;
 }
 
@@ -165,7 +168,6 @@ function afterStart() {
   Score = 0;
   Chance = 3;
   gameTime = 60;
-
   printScore(Score, Chance);
   showTime();
   randomMoleAppear();
